@@ -19,7 +19,35 @@ var vendor = proto.matchesSelector
  * Expose `match()`.
  */
 
-module.exports = match;
+module.exports = vendor 
+  ? match
+  // Fallback for IE8 etc..
+  : function match (el, selector) {
+    var root = el
+      , frag
+
+    while (root.parentNode) {
+      root = root.parentNode;
+    }
+
+    // root can't be the el unless its either a Document or a DocumentFragment
+    if (root === el && !(root instanceof Document || root instanceof DocumentFragment)) {
+      root = frag = document.createDocumentFragment();
+      frag.appendChild(el);
+    }
+
+    var nodes = root.querySelectorAll(selector)
+      , i = nodes.length
+    while (i--) {
+      if (nodes[i] === el) {
+        // detach from DocumentFragment if we used one
+        if (frag) frag.removeChild(frag.lastChild)
+        return true
+      }
+    }
+
+    return false
+  } 
 
 /**
  * Match `el` to `selector`.
@@ -31,10 +59,5 @@ module.exports = match;
  */
 
 function match(el, selector) {
-  if (vendor) return vendor.call(el, selector);
-  var nodes = el.parentNode.querySelectorAll(selector);
-  for (var i = 0; i < nodes.length; ++i) {
-    if (nodes[i] == el) return true;
-  }
-  return false;
+  return vendor.call(el, selector);
 }
