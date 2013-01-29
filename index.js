@@ -23,20 +23,15 @@ module.exports = vendor
   ? match
   // Fallback for IE8 etc..
   : function match (el, selector) {
-    var root = el
-      , frag
+    var parent = el.parentNode, frag
 
-    while (root.parentNode) {
-      root = root.parentNode;
-    }
-
-    // root can't be the el unless its either a Document or a DocumentFragment
-    if (root === el && !(root instanceof Document || root instanceof DocumentFragment)) {
-      root = frag = document.createDocumentFragment();
+    // use a DocumentFragment if the node isn't part of any other DOM node
+    if (!parent) {
+      parent = frag = document.createDocumentFragment();
       frag.appendChild(el);
     }
 
-    var nodes = root.querySelectorAll(selector)
+    var nodes = parent.querySelectorAll(selector)
       , i = nodes.length
     while (i--) {
       if (nodes[i] === el) {
